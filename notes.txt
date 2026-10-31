@@ -29,6 +29,8 @@ Transfer-Encoding: chunked
   }
 ]
 
+--------------------------------------------------------------------------------
+
 2.
 GET {{ContosoPizza_HostAddress}}/pizza/
 Accept: application/json
@@ -105,3 +107,28 @@ RESPONSE HTTP/1.1 204 No Content
 Connection: close
 Date: Sat, 31 Oct 2026 04:26:48 GMT
 Server: Kestrel
+
+-----------------------------------------------------------------------------------------------
+
+3.
+void GenerateSalesSummary(IEnumerable<string> salesFiles, double salesTotal)
+{
+
+    File.WriteAllText(Path.Combine(salesTotalDir, "salesSummary.txt"), $"Sales Summary{Environment.NewLine}{new string('-', 40)}{Environment.NewLine}Total Sales ${salesTotal:N2}{Environment.NewLine}");
+
+    foreach (var file in salesFiles)
+    {
+        if (Path.GetFileName(file) == "sales.json")
+        {
+            string salesJson = File.ReadAllText(file);
+
+            SalesData? data = JsonConvert.DeserializeObject<SalesData?>(salesJson);
+
+            var total = data?.Total ?? 0;
+
+            var storeName = Path.GetFileName(Path.GetDirectoryName(file));
+            File.AppendAllText(Path.Combine(salesTotalDir, "salesSummary.txt"), $"{storeName}: ${total:N2}{Environment.NewLine}");
+        }
+    }
+    }
+
